@@ -9,18 +9,17 @@ Board::Board() : m_centerNode(nullptr) {}
 
 void Board::buildGridVertices(const std::vector<int>& rowLengths) {
     m_nodes.clear();
-
     int numRows = rowLengths.size();
+    m_numRows = numRows;
     int midR = numRows / 2;
 
     for (int r = 0; r < numRows; ++r) {
         int length = rowLengths[r];
 
-        int startQ = (r <= midR) ? -r : -(numRows - 1 - r);
+        int startQ = (r <= midR) ? -r : -midR;
 
         for (int i = 0; i < length; ++i) {
             int q = startQ + i;
-
             m_nodes[{q, r}] = std::make_unique<Node>();
 
             if (r == midR && i == length / 2) {
@@ -152,34 +151,6 @@ void Board::generateSpanningTree() {
     }
 }
 
-void Board::addRandomCycles(int numCycles) {
-    struct PotentialEdge {
-        Node* a;
-        int dirA;
-        Node* b;
-        int dirB;
-    };
-    std::vector<PotentialEdge> possibleCycles;
-
-    for (auto& pair : m_nodes) {
-        Node* n = pair.second.get();
-        for (int i = 0; i < 3; ++i) {
-            Node* neighbor = n->getNeighbor(i);
-            if (neighbor != nullptr && !n->hasArm(i)) {
-                possibleCycles.push_back({ n, i, neighbor, (i + 3) % 6 });
-            }
-        }
-    }
-
-    std::mt19937 rng(std::random_device{}());
-    std::shuffle(possibleCycles.begin(), possibleCycles.end(), rng);
-
-    int cyclesToAdd = std::min(numCycles, static_cast<int>(possibleCycles.size()));
-    for (int i = 0; i < cyclesToAdd; ++i) {
-        connectNodes(possibleCycles[i].a, possibleCycles[i].dirA,
-            possibleCycles[i].b, possibleCycles[i].dirB);
-    }
-}
 
 void Board::scrambleBoard() {
     std::mt19937 rng(std::random_device{}());
@@ -194,27 +165,23 @@ void Board::scrambleBoard() {
     }
 }
 
-int Board::calculateDynamicCycleCount() const {
-
-    int totalNodes = m_nodes.size();
-    if (totalNodes == 0) return 0;
-
-    int minCycles = totalNodes / 3;
-    int maxCycles = (totalNodes * 2) / 3;
-
-    if (maxCycles <= minCycles) {
-        return minCycles;
-    }
-
-    std::mt19937 rng(std::random_device{}());
-    std::uniform_int_distribution<int> cycleDist(minCycles, maxCycles);
-
-    return cycleDist(rng);
-}
-
 void Board::forEachNodeReadonly(const std::function<void(int q, int r, const Node* node)>& action) const {
     for (const auto& pair : m_nodes) {
         action(pair.first.first, pair.first.second, pair.second.get());
+    }
+}
+
+void Board::rotateNodeAt(int q, int r, bool clockwise) {
+    auto it = m_nodes.find(std::make_pair(q, r));
+
+    if (it != m_nodes.end()) {
+        if (clockwise) {
+            it->second->rotateClockwise();
+        }
+        else {
+            it->second->rotateCounterClockwise();
+        }
+        updateLighting();
     }
 }
 
@@ -222,8 +189,6 @@ void Board::generateRandomLevel(const std::vector<int>& rowLengths) {
     buildGridVertices(rowLengths);
     mapNeighbors();
     generateSpanningTree();
-    int cyclesToAdd = calculateDynamicCycleCount();
-    addRandomCycles(cyclesToAdd);
     scrambleBoard();
     updateLighting();
 }

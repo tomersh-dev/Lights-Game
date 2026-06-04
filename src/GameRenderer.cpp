@@ -4,12 +4,12 @@
 
 GameRenderer::GameRenderer() {}
 
-sf::Vector2f GameRenderer::getPixelPosition(int q, int r, float screenWidth, float screenHeight) {
+sf::Vector2f GameRenderer::getPixelPosition(int q, int r, float screenWidth, float screenHeight, int midR) {
     float rawX = (q + r * 0.5f) * Config::HEX_SPACING;
     float rawY = r * Config::HEX_SPACING * (std::sqrt(3.0f) / 2.0f);
 
-    float centerX = (Config::LEVEL1_CENTER_Q + Config::LEVEL1_CENTER_R * 0.5f) * Config::HEX_SPACING;
-    float centerY = Config::LEVEL1_CENTER_R * Config::HEX_SPACING * (std::sqrt(3.0f) / 2.0f);
+    float centerX = (0 + midR * 0.5f) * Config::HEX_SPACING;
+    float centerY = midR * Config::HEX_SPACING * (std::sqrt(3.0f) / 2.0f);
 
     float finalX = (rawX - centerX) + (screenWidth / 2.0f);
     float finalY = (rawY - centerY) + (screenHeight / 2.0f);
@@ -20,6 +20,7 @@ sf::Vector2f GameRenderer::getPixelPosition(int q, int r, float screenWidth, flo
 void GameRenderer::draw(sf::RenderWindow& window, const Board& board) {
     float winWidth = static_cast<float>(window.getSize().x);
     float winHeight = static_cast<float>(window.getSize().y);
+    int midR = board.getNumRows() / 2;
 
     sf::CircleShape nodeShape(Config::NODE_RADIUS);
     nodeShape.setOrigin({ Config::NODE_RADIUS, Config::NODE_RADIUS });
@@ -30,7 +31,7 @@ void GameRenderer::draw(sf::RenderWindow& window, const Board& board) {
     armShape.setOrigin({ 0.0f, Config::ARM_THICKNESS / 2.0f });
 
     board.forEachNodeReadonly([&](int q, int r, const Node* node) {
-        sf::Vector2f pixelPos = getPixelPosition(q, r, winWidth, winHeight);
+        sf::Vector2f pixelPos = getPixelPosition(q, r, winWidth, winHeight, midR);
 
         sf::Color activeColor = node->isLit() ? Config::COLOR_LIT : Config::COLOR_UNLIT;
 
