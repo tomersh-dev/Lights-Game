@@ -1,12 +1,26 @@
 #include "GameController.h"
 #include <iostream>
 #include <cmath>
+#include <stdexcept>
 
 GameController::GameController()
     : m_window(sf::VideoMode({ Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT }), "Lights Puzzle Game"),
-    m_isLevelSolved(false), m_currentLevel(1)
+    m_isLevelSolved(false),
+    m_isGameFinished(false),
+    m_currentLevel(1),
+    m_messageText(m_font)
 {
     m_window.setFramerateLimit(Config::FPS_LIMIT);
+
+    if (!m_font.openFromFile("resources/arial.ttf")) {
+        throw std::runtime_error("Critical Error: Failed to load font 'resources/arial.ttf'. Please ensure the resources folder is in the correct directory.");
+    }
+
+    m_messageText.setCharacterSize(Config::FONT_SIZE);
+    m_messageText.setFillColor(Config::COLOR_TEXT);
+    m_messageText.setOutlineColor(sf::Color::Black);
+    m_messageText.setOutlineThickness(2.0f);
+
     loadLevel(m_currentLevel);
 }
 
@@ -39,6 +53,10 @@ void GameController::processEvents() {
             m_window.close();
         }
         else if (const auto* mouseEvent = event->getIf<sf::Event::MouseButtonPressed>()) {
+            if (m_isGameFinished) {
+                m_window.close();
+                continue;
+            }
 
             if (m_isLevelSolved) {
                 if (m_currentLevel < Config::MAX_LEVELS) {
@@ -46,8 +64,8 @@ void GameController::processEvents() {
                     loadLevel(m_currentLevel);
                 }
                 else {
-                    std::cout << "Game Finished! All levels completed." << std::endl;
-                    m_window.close();
+                    m_isGameFinished = true;
+                    m_isLevelSolved = false;
                 }
                 continue;
             }
@@ -92,7 +110,6 @@ void GameController::handleMouseClick(int mouseX, int mouseY, bool isLeftClick) 
 
         if (m_board.isSolved()) {
             m_isLevelSolved = true;
-            std::cout << "Level " << m_currentLevel << " Solved! Click anywhere to continue." << std::endl;
         }
     }
 }
@@ -100,5 +117,24 @@ void GameController::handleMouseClick(int mouseX, int mouseY, bool isLeftClick) 
 void GameController::render() {
     m_window.clear(Config::COLOR_BACKGROUND);
     m_renderer.draw(m_window, m_board);
+
+    if (m_isLevelSolved || m_isGameFinished) {
+
+        if (m_isGameFinished) {
+            m_messageText.setString("Game Finished! All levels completed.\nClick anywhere to exit.");
+        }
+        else if (m_isLevelSolved) {
+            m_messageText.setString("Level " + std::to_string(m_currentLevel) + " Solved!\nClick anywhere to continue.");
+        }
+
+        sf::FloatRect textRect = m_messageText.getLocalBounds();
+        m_messageText.setOrigin({ textRect.position.x + textRect.size.x / 2.0f,
+                                 textRect.position.y + textRect.size.y / 2.0f });
+
+        m_messageText.setPosition({ Config::WINDOW_WIDTH / 2.0f, Config::WINDOW_HEIGHT / 4.0f });
+
+        m_window.draw(m_messageText);
+    }
+
     m_window.display();
 }

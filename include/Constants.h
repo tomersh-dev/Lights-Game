@@ -20,4 +20,7 @@ namespace Config {
     inline const sf::Color COLOR_UNLIT(100, 100, 100);
     inline const sf::Color COLOR_OUTLINE(50, 50, 50);
     inline const sf::Color COLOR_BACKGROUND(30, 30, 30);
+
+    constexpr unsigned int FONT_SIZE = 40;
+    inline const sf::Color COLOR_TEXT(255, 255, 255);
 }

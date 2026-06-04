@@ -10,14 +10,19 @@ public:
     void run();
 
 private:
+    void processEvents();
+    void render();
+    void handleMouseClick(int mouseX, int mouseY, bool isLeftClick);
+    void loadLevel(int level);
+
     sf::RenderWindow m_window;
     Board m_board;
     GameRenderer m_renderer;
 
     bool m_isLevelSolved;
-    void loadLevel(int level);
+    bool m_isGameFinished;
     int m_currentLevel;
-    void processEvents();
-    void render();
-    void handleMouseClick(int mouseX, int mouseY, bool isLeftClick);
+
+    sf::Font m_font;
+    sf::Text m_messageText;
 };
