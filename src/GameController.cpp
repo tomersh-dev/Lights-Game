@@ -30,7 +30,7 @@ GameController::GameController()
 }
 
 void GameController::loadLevel(int level) {
-    int middleLength = 5 + (level - 1) * 2;
+    int middleLength = Config::INITIAL_LEVEL_SIZE + (level - 1) * Config::LEVEL_SIZE_INCREMENT;
     int numRows = middleLength;
     std::vector<int> rowLengths(numRows);
     int midIndex = numRows / 2;
@@ -81,15 +81,6 @@ void GameController::processEvents() {
                 handleMouseClick(mouseEvent->position.x, mouseEvent->position.y, false);
             }
         }
-        ///////////////////////////////
-        else if (const auto* keyEvent = event->getIf<sf::Event::KeyPressed>()) {
-            if (keyEvent->code == sf::Keyboard::Key::W) {
-                if (!m_isGameFinished && !m_isLevelSolved) {
-                    m_isLevelSolved = true;
-                }
-            }
-        }
-        /////////////////////////////////
     }
 }
 

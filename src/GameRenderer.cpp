@@ -8,8 +8,10 @@ GameRenderer::GameRenderer() {}
 float GameRenderer::calculateScale(int numRows, float screenWidth, float screenHeight) {
     float boardWidth = numRows * Config::HEX_SPACING;
     float boardHeight = numRows * Config::HEX_SPACING * (std::sqrt(3.0f) / 2.0f);
-    float scaleX = (screenWidth * 0.90f) / boardWidth;
-    float scaleY = (screenHeight * 0.85f) / boardHeight;
+
+    float scaleX = (screenWidth * Config::BOARD_WIDTH_PERCENT) / boardWidth;
+    float scaleY = (screenHeight * Config::BOARD_HEIGHT_PERCENT) / boardHeight;
+
     return std::min(1.0f, std::min(scaleX, scaleY));
 }
 
@@ -23,7 +25,7 @@ sf::Vector2f GameRenderer::getPixelPosition(int q, int r, float screenWidth, flo
     float centerY = midR * scaledSpacing * (std::sqrt(3.0f) / 2.0f);
 
     float finalX = (rawX - centerX) + (screenWidth / 2.0f);
-    float finalY = (rawY - centerY) + (screenHeight * 0.52f);
+    float finalY = (rawY - centerY) + (screenHeight * Config::BOARD_VERTICAL_CENTER);
 
     return { finalX, finalY };
 }

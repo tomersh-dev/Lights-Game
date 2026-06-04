@@ -23,4 +23,14 @@ namespace Config {
 
     constexpr unsigned int FONT_SIZE = 40;
     inline const sf::Color COLOR_TEXT(255, 255, 255);
+
+    constexpr float BOARD_WIDTH_PERCENT = 0.90f;
+    constexpr float BOARD_HEIGHT_PERCENT = 0.85f;
+
+    constexpr float TEXT_VERTICAL_DIVISOR = 8.0f;
+
+    constexpr float BOARD_VERTICAL_CENTER = 0.52f;
+
+    constexpr int INITIAL_LEVEL_SIZE = 5;
+    constexpr int LEVEL_SIZE_INCREMENT = 2;
 }
