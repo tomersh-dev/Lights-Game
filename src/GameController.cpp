@@ -1,5 +1,4 @@
 #include "GameController.h"
-#include <iostream>
 #include <cmath>
 #include <stdexcept>
 
@@ -11,9 +10,15 @@ GameController::GameController()
     m_messageText(m_font)
 {
     m_window.setFramerateLimit(Config::FPS_LIMIT);
-
-    if (!m_font.openFromFile("resources/arial.ttf")) {
-        throw std::runtime_error("Critical Error: Failed to load font 'resources/arial.ttf'. Please ensure the resources folder is in the correct directory.");
+    bool fontLoaded = false;
+    try {
+        fontLoaded = m_font.openFromFile("resources/arial.ttf");
+    }
+    catch (...) {
+        fontLoaded = false;
+    }
+    if (!fontLoaded) {
+        throw std::runtime_error("Critical Error: Failed to load font 'resources/arial.ttf'.");
     }
 
     m_messageText.setCharacterSize(Config::FONT_SIZE);
@@ -37,7 +42,6 @@ void GameController::loadLevel(int level) {
 
     m_board.generateRandomLevel(rowLengths);
     m_isLevelSolved = false;
-    std::cout << "Loading Level " << level << "..." << std::endl;
 }
 
 void GameController::run() {
@@ -77,36 +81,51 @@ void GameController::processEvents() {
                 handleMouseClick(mouseEvent->position.x, mouseEvent->position.y, false);
             }
         }
+        ///////////////////////////////
+        else if (const auto* keyEvent = event->getIf<sf::Event::KeyPressed>()) {
+            if (keyEvent->code == sf::Keyboard::Key::W) {
+                if (!m_isGameFinished && !m_isLevelSolved) {
+                    m_isLevelSolved = true;
+                }
+            }
+        }
+        /////////////////////////////////
     }
 }
 
-void GameController::handleMouseClick(int mouseX, int mouseY, bool isLeftClick) {
+std::optional<std::pair<int, int>> GameController::getClickedHexagon(int mouseX, int mouseY) const {
     float winWidth = static_cast<float>(m_window.getSize().x);
     float winHeight = static_cast<float>(m_window.getSize().y);
-    int midR = m_board.getNumRows() / 2;
+    int numRows = m_board.getNumRows();
+    int midR = numRows / 2;
 
-    int clickedQ = -999;
-    int clickedR = -999;
-    bool nodeFound = false;
+    float scale = GameRenderer::calculateScale(numRows, winWidth, winHeight);
+    float scaledRadius = Config::NODE_RADIUS * scale;
+    float clickRadiusSquared = scaledRadius * scaledRadius;
+
+    std::optional<std::pair<int, int>> clickedNode = std::nullopt;
 
     m_board.forEachNodeReadonly([&](int q, int r, const Node* node) {
-        if (nodeFound) return;
-
-        sf::Vector2f nodePos = GameRenderer::getPixelPosition(q, r, winWidth, winHeight, midR);
+        sf::Vector2f nodePos = GameRenderer::getPixelPosition(q, r, winWidth, winHeight, midR, scale);
 
         float dx = nodePos.x - static_cast<float>(mouseX);
         float dy = nodePos.y - static_cast<float>(mouseY);
         float distanceSquared = (dx * dx) + (dy * dy);
 
-        if (distanceSquared <= (Config::NODE_RADIUS * Config::NODE_RADIUS)) {
-            clickedQ = q;
-            clickedR = r;
-            nodeFound = true;
+        if (distanceSquared <= clickRadiusSquared) {
+            clickedNode = std::make_pair(q, r);
         }
+        return false;
         });
 
-    if (nodeFound) {
-        m_board.rotateNodeAt(clickedQ, clickedR, isLeftClick);
+    return clickedNode;
+}
+
+void GameController::handleMouseClick(int mouseX, int mouseY, bool isLeftClick) {
+    auto clickedHex = getClickedHexagon(mouseX, mouseY);
+
+    if (clickedHex.has_value()) {
+        m_board.rotateNodeAt(clickedHex->first, clickedHex->second, isLeftClick);
 
         if (m_board.isSolved()) {
             m_isLevelSolved = true;
@@ -131,7 +150,7 @@ void GameController::render() {
         m_messageText.setOrigin({ textRect.position.x + textRect.size.x / 2.0f,
                                  textRect.position.y + textRect.size.y / 2.0f });
 
-        m_messageText.setPosition({ Config::WINDOW_WIDTH / 2.0f, Config::WINDOW_HEIGHT / 4.0f });
+        m_messageText.setPosition({ Config::WINDOW_WIDTH / 2.0f, Config::WINDOW_HEIGHT / 8.0f });
 
         m_window.draw(m_messageText);
     }

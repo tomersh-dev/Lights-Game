@@ -3,6 +3,7 @@
 #include "Board.h"
 #include "GameRenderer.h"
 #include "Constants.h"
+#include <optional>
 
 class GameController {
 public:
@@ -12,6 +13,7 @@ public:
 private:
     void processEvents();
     void render();
+    std::optional<std::pair<int, int>> getClickedHexagon(int mouseX, int mouseY) const;
     void handleMouseClick(int mouseX, int mouseY, bool isLeftClick);
     void loadLevel(int level);
 

@@ -1,5 +1,4 @@
 #include "Board.h"
-#include <iostream>
 #include <queue>
 #include <random>
 #include <algorithm>
@@ -165,9 +164,11 @@ void Board::scrambleBoard() {
     }
 }
 
-void Board::forEachNodeReadonly(const std::function<void(int q, int r, const Node* node)>& action) const {
+void Board::forEachNodeReadonly(const std::function<bool(int q, int r, const Node* node)>& action) const {
     for (const auto& pair : m_nodes) {
-        action(pair.first.first, pair.first.second, pair.second.get());
+        if (action(pair.first.first, pair.first.second, pair.second.get())) {
+            break;
+        }
     }
 }
 

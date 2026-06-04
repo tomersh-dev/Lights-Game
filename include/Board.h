@@ -14,7 +14,7 @@ public:
     void updateLighting();
     bool isSolved() const;
     void rotateNodeAt(int q, int r, bool clockwise);
-    void forEachNodeReadonly(const std::function<void(int q, int r, const Node* node)>& action) const;
+    void forEachNodeReadonly(const std::function<bool(int q, int r, const Node* node)>& action) const;
     int getNumRows() const { return m_numRows; }
 
 private:

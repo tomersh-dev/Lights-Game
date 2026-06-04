@@ -12,7 +12,6 @@ int main() {
         std::ofstream logFile("log.txt");
 
         if (logFile.is_open()) {
-            logFile << "Critical Error Occurred:\n";
             logFile << e.what() << "\n";
             logFile.close();
         }

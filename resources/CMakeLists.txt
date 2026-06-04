@@ -1,1 +1,1 @@
-# configure_file ("play-list.txt" ${CMAKE_BINARY_DIR} COPYONLY)
+file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/" DESTINATION "${CMAKE_BINARY_DIR}/resources")

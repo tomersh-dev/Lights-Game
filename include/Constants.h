@@ -3,7 +3,7 @@
 
 namespace Config {
     constexpr unsigned int WINDOW_WIDTH = 1024;
-    constexpr unsigned int WINDOW_HEIGHT = 768;
+    constexpr unsigned int WINDOW_HEIGHT = 1024;
     constexpr unsigned int FPS_LIMIT = 60;
 
     constexpr unsigned int MAX_LEVELS = 3;
